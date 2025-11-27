@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "TEST_MESSAGE") {
     // get active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
