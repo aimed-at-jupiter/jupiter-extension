@@ -6,13 +6,15 @@ chrome.runtime.onMessage.addListener((msg) => {
       if (!tab?.id) return;
 
       // inject content script
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["contentScript.js"],
-      });
-
-      // send message to content script
-      chrome.tabs.sendMessage(tab.id, { type: "FROM_BACKGROUND" });
+      chrome.scripting
+        .executeScript({
+          target: { tabId: tab.id },
+          files: ["contentScript.js"],
+        })
+        .then(() => {
+          // send message to content script
+          chrome.tabs.sendMessage(tab.id!, { type: "FROM_BACKGROUND" });
+        });
     });
   }
 });
