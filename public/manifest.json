@@ -8,6 +8,6 @@
   "permissions": ["scripting", "activeTab", "storage"],
   "host_permissions": ["https://jsonplaceholder.typicode.com/*"],
   "background": {
-    "service_worker": "service-worker.js"
+    "service_worker": "background.js"
   }
 }
