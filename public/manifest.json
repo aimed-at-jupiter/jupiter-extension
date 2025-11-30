@@ -6,7 +6,11 @@
     "default_popup": "index.html"
   },
   "permissions": ["scripting", "activeTab", "storage"],
-  "host_permissions": ["https://example.com/*", "http://localhost/*"],
+  "host_permissions": [
+    "https://example.com/*",
+    "http://localhost/*",
+    "file:///*"
+  ],
   "background": {
     "service_worker": "background.js"
   }
