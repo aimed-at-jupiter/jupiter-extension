@@ -1,18 +1,20 @@
-console.log("Content script loaded.");
+import type { FillFormMessage } from "./types";
 
-chrome.runtime.onMessage.addListener((msg) => {
-  console.log("Content script received:", msg);
-  if (msg.type === "FROM_BACKGROUND") {
-    (document.getElementById("full-name") as HTMLInputElement).value =
-      "Dale Cooper";
-    (document.getElementById("email") as HTMLInputElement).value =
-      "cooper@bluerose.com";
-    (document.getElementById("address-line-1") as HTMLInputElement).value =
-      "Great Northern Hotel";
-    (document.getElementById("city") as HTMLInputElement).value = "Twin Peaks";
-    (document.getElementById("post-code") as HTMLInputElement).value =
-      "WA 98065-1109";
-    (document.getElementById("phone") as HTMLInputElement).value =
-      "800.272.5474";
-  }
+chrome.runtime.onMessage.addListener((msg: FillFormMessage) => {
+  if (msg.type !== "FILL_FORM") return;
+
+  const clientData = msg.payload;
+
+  (document.getElementById("full-name") as HTMLInputElement).value =
+    clientData.fullName;
+  (document.getElementById("email") as HTMLInputElement).value =
+    clientData.email;
+  (document.getElementById("address-line-1") as HTMLInputElement).value =
+    clientData.address.line1;
+  (document.getElementById("city") as HTMLInputElement).value =
+    clientData.address.city;
+  (document.getElementById("post-code") as HTMLInputElement).value =
+    clientData.address.postCode;
+  (document.getElementById("phone") as HTMLInputElement).value =
+    clientData.phone;
 });

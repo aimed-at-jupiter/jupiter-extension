@@ -9,3 +9,8 @@ export type ClientSummary = {
     postCode: string;
   };
 };
+
+export type FillFormMessage = {
+  type: "FILL_FORM";
+  payload: ClientSummary;
+};
