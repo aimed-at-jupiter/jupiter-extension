@@ -11,7 +11,7 @@ export function getTitle(name: string): {
 
   if (titles.includes(firstPart)) {
     return {
-      title: firstPart[0].toUpperCase(),
+      title: firstPart[0].toUpperCase() + firstPart.slice(1),
       nameWithoutTitle: parts.slice(1).join(" "),
     };
   }
