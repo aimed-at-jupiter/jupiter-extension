@@ -84,7 +84,6 @@ function App() {
                   padding: "0.5rem",
                   border: "1px solid #ccc",
                   marginBottom: "0.5rem",
-                  cursor: "pointer",
                 }}
               >
                 <div
@@ -107,7 +106,6 @@ function App() {
                     <button
                       onClick={() => handleSendToCRM(client, index)}
                       disabled={status.sending || status.sent}
-                      style={{ marginLeft: "0.5rem" }}
                     >
                       {status.sending
                         ? "Sending..."
