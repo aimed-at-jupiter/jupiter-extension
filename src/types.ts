@@ -14,3 +14,9 @@ export type FillFormMessage = {
   type: "FILL_FORM";
   payload: ClientSummary;
 };
+
+export type ClientStatus = {
+  sending: boolean;
+  error?: string;
+  sent?: boolean;
+};
