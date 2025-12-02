@@ -71,10 +71,11 @@ function App() {
 
   return (
     <>
-      {loading && <div>Loading users...</div>}
+      {loading && <div>Loading clients...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
       <div style={{ padding: "1rem" }}>
         <h1>Jupiter Extension</h1>
+        <p>Clients</p>
         <ul style={{ marginTop: "1rem", padding: 0, listStyle: "none" }}>
           {clients.map((client: ClientSummary, index: number) => {
             const status: ClientStatus = clientStatuses[index] || {
