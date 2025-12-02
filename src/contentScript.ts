@@ -13,6 +13,7 @@ chrome.runtime.onMessage.addListener((msg: FillFormMessage) => {
   if (msg.type !== "FILL_FORM") return;
 
   const clientData = msg.payload;
+
   setInputValue("title", clientData.title);
   setInputValue("full-name", clientData.fullName);
   setInputValue("email", clientData.email);
