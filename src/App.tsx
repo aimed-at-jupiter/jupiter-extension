@@ -114,6 +114,12 @@ function App() {
                     <button
                       onClick={() => handleSendToCRM(client, index)}
                       disabled={status.sending || status.sent}
+                      style={{
+                        backgroundColor: status.sent ? "green" : undefined,
+                        color: status.sent ? "white" : undefined,
+                        cursor: status.sent ? "not-allowed" : undefined,
+                        pointerEvents: status.sent ? "none" : undefined,
+                      }}
                     >
                       {status.sending
                         ? "Sending..."
