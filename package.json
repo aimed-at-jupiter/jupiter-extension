@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "setup-db": "psql -U postgres -d postgres -f ./server/db/setup-db.sql && psql -U postgres -d jupiter_clients -f ./server/db/setup-table.sql",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

@@ -12,6 +12,8 @@ function App() {
     Record<number, ClientStatus>
   >({});
 
+  const BACKEND_URL = "http://localhost:8080/clients";
+
   const handleAutofill = (client: ClientSummary) => {
     chrome.runtime.sendMessage({ type: "FILL_FORM", payload: client });
   };
@@ -26,13 +28,16 @@ function App() {
       [index]: { sending: true, error: undefined, sent: false },
     }));
 
-    fetch("path", {
+    fetch(BACKEND_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(client),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to send");
+        return res.json();
+      })
+      .then(() => {
         setClientStatuses((prev) => ({
           ...prev,
           [index]: { sending: false, error: undefined, sent: true },
@@ -58,9 +63,9 @@ function App() {
         setLoading(false);
       })
       .catch((err) => {
+        console.error(err);
         setError("failed to load clients");
         setLoading(false);
-        console.error(err);
       });
   };
 
@@ -99,7 +104,10 @@ function App() {
                     <div>City: {client.address.city}</div>
                     <div>Phone: {client.phone}</div>
 
-                    <button onClick={() => handleAutofill(client)}>
+                    <button
+                      onClick={() => handleAutofill(client)}
+                      disabled={status.sending}
+                    >
                       Autofill Form
                     </button>
 
