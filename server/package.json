@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "setup-db": "psql -d postgres -f ./db/setup-db.sql",
     "dev": "nodemon --watch '**/*.ts' --exec ts-node App.ts"
   },
   "keywords": [],
