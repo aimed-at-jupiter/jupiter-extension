@@ -7,7 +7,7 @@ A Chromium browser extension to fetch client data from a public, transform, auto
 ## Public API
 
 - **API Chosen:** [JSONPlaceholder](https://jsonplaceholder.typicode.com/users)
-- **Why:** Simple API with realistic user data suitable for testing fetch and transform. I felt this was most similar to real world client data.
+- Simple API with realistic user data, I felt this was most similar to real world client data.
 
 ---
 
