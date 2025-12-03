@@ -2,6 +2,13 @@ import "./App.css";
 import { normaliseClient } from "./utils/normaliseClient";
 import { useState, useEffect } from "react";
 import type { ClientSummary, ClientStatus } from "./types";
+import { ClientItem } from "./components/ClientItem";
+
+const defaultStatus: ClientStatus = {
+  sending: false,
+  sent: false,
+  error: undefined,
+};
 
 function App() {
   const [clients, setClients] = useState<ClientSummary[]>([]);
@@ -14,13 +21,37 @@ function App() {
 
   const BACKEND_URL = "http://localhost:8080/clients";
 
-  const handleAutofill = (client: ClientSummary) => {
-    chrome.runtime.sendMessage({ type: "FILL_FORM", payload: client });
-  };
-
   useEffect(() => {
     fetchClients();
   }, []);
+
+  const fetchClients = () => {
+    setLoading(true);
+    setError(null);
+
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((res) => res.json())
+      .then((rawUsers: any[]) => {
+        const normalisedClients = rawUsers.map((user) => normaliseClient(user));
+        setClients(normalisedClients);
+
+        const initialStatus: Record<number, ClientStatus> = {};
+        normalisedClients.forEach((_, index) => {
+          initialStatus[index] = { ...defaultStatus };
+        });
+        setClientStatuses(initialStatus);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("failed to load clients");
+        setLoading(false);
+      });
+  };
+
+  const handleAutofill = (client: ClientSummary) => {
+    chrome.runtime.sendMessage({ type: "FILL_FORM", payload: client });
+  };
 
   const handleSendToCRM = (client: ClientSummary, index: number) => {
     setClientStatuses((prev) => ({
@@ -51,97 +82,27 @@ function App() {
       });
   };
 
-  const fetchClients = () => {
-    setLoading(true);
-    setError(null);
-
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((res) => res.json())
-      .then((rawUsers: any[]) => {
-        const normalisedClients = rawUsers.map((user) => normaliseClient(user));
-        setClients(normalisedClients);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("failed to load clients");
-        setLoading(false);
-      });
-  };
-
   return (
-    <>
+    <div style={{ padding: "1rem" }}>
+      <h1>Jupiter Extension</h1>
       {loading && <div>Loading clients...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
-      <div style={{ padding: "1rem" }}>
-        <h1>Jupiter Extension</h1>
-        <p>Clients</p>
-        <ul style={{ marginTop: "1rem", padding: 0, listStyle: "none" }}>
-          {clients.map((client: ClientSummary, index: number) => {
-            const status: ClientStatus = clientStatuses[index] || {
-              sending: false,
-              sent: false,
-              error: undefined,
-            };
-            return (
-              <li
-                key={index}
-                style={{
-                  padding: "0.5rem",
-                  border: "1px solid #ccc",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <div
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setExpanded(expanded === index ? null : index)}
-                >
-                  {client.fullName}
-                </div>
 
-                {expanded === index && (
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <div>Email: {client.email}</div>
-                    <div>City: {client.address.city}</div>
-                    <div>Phone: {client.phone}</div>
-
-                    <button
-                      onClick={() => handleAutofill(client)}
-                      disabled={status.sending}
-                    >
-                      Autofill Form
-                    </button>
-
-                    <button
-                      onClick={() => handleSendToCRM(client, index)}
-                      disabled={status.sending || status.sent}
-                      style={{
-                        backgroundColor: status.sent ? "green" : undefined,
-                        color: status.sent ? "white" : undefined,
-                        cursor: status.sent ? "not-allowed" : undefined,
-                        pointerEvents: status.sent ? "none" : undefined,
-                      }}
-                    >
-                      {status.sending
-                        ? "Sending..."
-                        : status.sent
-                        ? "Sent"
-                        : "Send to CRM"}
-                    </button>
-
-                    {status.error && (
-                      <div style={{ color: "red", marginTop: "0.25rem" }}>
-                        {status.error}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </>
+      <ul style={{ marginTop: "1rem", padding: 0, listStyle: "none" }}>
+        {clients.map((client, index) => (
+          <ClientItem
+            key={index}
+            client={client}
+            index={index}
+            expanded={expanded}
+            setExpanded={setExpanded}
+            status={clientStatuses[index]}
+            onAutofill={handleAutofill}
+            onSendToCRM={handleSendToCRM}
+          />
+        ))}
+      </ul>
+    </div>
   );
 }
 

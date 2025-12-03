@@ -8,17 +8,19 @@ function setInputValue(id: string, value?: string) {
   }
   if (value !== undefined) input.value = value;
 }
+if (!(window as any).__fillFormListenerAdded) {
+  chrome.runtime.onMessage.addListener((msg: FillFormMessage) => {
+    if (msg.type !== "FILL_FORM") return;
 
-chrome.runtime.onMessage.addListener((msg: FillFormMessage) => {
-  if (msg.type !== "FILL_FORM") return;
+    const clientData = msg.payload;
 
-  const clientData = msg.payload;
-
-  setInputValue("title", clientData.title);
-  setInputValue("full-name", clientData.fullName);
-  setInputValue("email", clientData.email);
-  setInputValue("address-line-1", clientData.address.line1);
-  setInputValue("city", clientData.address.city);
-  setInputValue("post-code", clientData.address.postCode);
-  setInputValue("phone", clientData.phone);
-});
+    setInputValue("title", clientData.title);
+    setInputValue("full-name", clientData.fullName);
+    setInputValue("email", clientData.email);
+    setInputValue("address-line-1", clientData.address.line1);
+    setInputValue("city", clientData.address.city);
+    setInputValue("post-code", clientData.address.postCode);
+    setInputValue("phone", clientData.phone);
+  });
+  (window as any).__fillFormListenerAdded = true;
+}

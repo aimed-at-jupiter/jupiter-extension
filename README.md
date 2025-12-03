@@ -1,75 +1,194 @@
-# React + TypeScript + Vite
+# Jupiter Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Chromium browser extension to fetch client data from a public, transform, autofill a form and optionally send the data to a backend server.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Public API
 
-## React Compiler
+- **API Chosen:** [JSONPlaceholder](https://jsonplaceholder.typicode.com/users)
+- **Why:** Simple API with realistic user data suitable for testing fetch and transform. I felt this was most similar to real world client data.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
+## Data Transformation
 
-## Expanding the ESLint configuration
+The raw API data is transformed (and summarised) into a `ClientSummary` object:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```ts
+type ClientSummary = {
+  fullName: string;
+  title?: string;
+  email: string;
+  phone: string;
+  address: {
+    line1: string;
+    city: string;
+    postCode: string;
+  };
+};
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+#### Key Changes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `name` is parsed for a valid title, which is then omitted from `name` and assigned to a seperate `title` key if a title is present.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- `address.suite` and `address.street` are combined and assigned to `address.line1`.
+  If `suite` includes the string "suite", it is omitted, all other strings (eg. "Flat, "Apt.", "Great Northen Hotel") are kept.
+
+- I decided to keep all values as strings, given the possible valid formats of phone numbers, post/zip codes, and building names/numbers.
+
+#### example transformation
+
 ```
+{
+    "id": 6,
+    "name": "Mrs. Dennis Schulist",
+    "username": "Leopoldo_Corkery",
+    "email": "Karley_Dach@jasper.info",
+    "address": {
+      "street": "Norberto Crossing",
+      "suite": "Apt. 950",
+      "city": "South Christy",
+      "zipcode": "23505-1337",
+      "geo": {
+        "lat": "-71.4197",
+        "lng": "71.7478"
+      }
+    },
+    "phone": "1-477-935-8478 x6430",
+    "website": "ola.org",
+    "company": {
+      "name": "Considine-Lockman",
+      "catchPhrase": "Synchronised bottom-line interface",
+      "bs": "e-enable innovative applications"
+    }
+  }
+```
+
+becomes
+
+```
+{
+  fullName: "Dennis Schulist";
+  title?: "Mrs";
+  email: "Karley_Dach@jasper.info";
+  phone: "1-477-935-8478 x6430";
+  address: {
+    line1: "Apt. 950 Norberto Crossing";
+    city: "South Christy";
+    postCode: "23505-1337";
+  };
+}
+```
+
+## Run the Server
+
+#### Prerequisites
+
+- Node.js (v16+ recommended)
+- PostgreSQL installed locally
+
+Ensure the PostgreSQL user has permissions to create databases
+
+---
+
+#### Install Dependencies
+
+```
+cd server
+npm install
+
+```
+
+#### Setup Database
+
+This will create the jupiter_clients database and clients table.
+
+```
+npm run setup-db
+```
+
+This runs setup-db.sql which creates the database and tables automatically.
+
+#### Run the Server
+
+```
+npm run dev
+```
+
+The server will start on:
+http://localhost:8080
+
+#### API Endpoint
+
+POST /clients
+
+Send a client record to the backend.
+
+Request Body (JSON)
+
+```
+{
+  "title": "Mr",
+  "fullName": "Dale Cooper",
+  "email": "cooper@bluerose.com",
+  "phone": "+1 425 888 2556",
+  "address": {
+    "line1": "315 Great Northern Hotel",
+    "city": "Twin Peaks",
+    "postCode": "WA 98065-9687"
+  }
+}
+```
+
+Response
+
+201 — successfully sent to backend and stored in CRM db
+
+500 — error saving the record
+
+---
+
+## How to Test the Extension
+
+**1. Load the Extension**
+
+- Open Chrome/Edge/Brave.
+
+- Go to chrome://extensions (or edge://extensions / brave://extensions).
+
+- Enable Developer mode.
+
+- Click Load unpacked and select the /extension folder.
+
+**2. Open the Demo Form**
+
+- Open demo-site/client-form.html in your browser.
+
+This is a simple HTML page with inputs for:
+Title
+Full Name
+Email
+Phone
+Address Line 1
+City
+Post Code
+
+**3. Fetch and Autofill**
+
+- Click the extension icon to open the popup.
+
+- Click on a client to expand and preview details.
+
+- Click Autofill Form — the demo page should populate with the client’s info.
+
+**4. Optional: Send to CRM**
+
+- Click Send to CRM to post the client record to the local backend.
+
+- Button will show Sending…, then Sent (green) on success.
+
+- Errors are displayed in red.
+
+Thank you for taking the time to check out my extension!

@@ -1,4 +1,6 @@
-chrome.runtime.onMessage.addListener((msg) => {
+import type { FillFormMessage } from "./types";
+
+chrome.runtime.onMessage.addListener((msg: FillFormMessage) => {
   if (msg.type === "FILL_FORM") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
@@ -10,10 +12,10 @@ chrome.runtime.onMessage.addListener((msg) => {
           files: ["contentScript.js"],
         })
         .then(() => {
-          chrome.tabs.sendMessage(tab.id!, {
-            type: "FILL_FORM",
-            payload: msg.payload,
-          });
+          chrome.tabs.sendMessage(tab.id!, msg);
+        })
+        .catch((err) => {
+          console.error("failed to inject content script", err);
         });
     });
   }

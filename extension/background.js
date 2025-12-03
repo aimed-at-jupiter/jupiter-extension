@@ -1,0 +1,1 @@
+chrome.runtime.onMessage.addListener(t=>{t.type==="FILL_FORM"&&chrome.tabs.query({active:!0,currentWindow:!0},r=>{const e=r[0];e?.id&&chrome.scripting.executeScript({target:{tabId:e.id},files:["contentScript.js"]}).then(()=>{chrome.tabs.sendMessage(e.id,t)}).catch(c=>{console.error("failed to inject content script",c)})})});
