@@ -1,6 +1,6 @@
 # Jupiter Extension
 
-A Chromium browser extension to fetch client data from a public, transform, autofill a form and optionally send the data to a backend server.
+A Chromium browser extension to fetch client data from an API, transform the data, autofill a form and optionally send the data to a backend server.
 
 ---
 
@@ -167,13 +167,13 @@ Response
 - Open demo-site/client-form.html in your browser.
 
 This is a simple HTML page with inputs for:
-Title
-Full Name
-Email
-Phone
-Address Line 1
-City
-Post Code
+
+- Full Name
+- Email
+- Phone
+- Address Line 1
+- City
+- Post Code
 
 **3. Fetch and Autofill**
 
